@@ -23,9 +23,11 @@ from flask import Flask, request, jsonify
 
 load_dotenv()
 
-latest_o1 ="hello i am pranv"
-latest_o3 = "hello i am partyh"
+latest_o1 ="hello i am pranv i am very good "
+latest_o3 = "hello i am parth i am excellent and very bright"
 overlay_text = ""
+state = 0
+answers = [latest_o1,latest_o3]
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -38,13 +40,15 @@ def wnd_proc(hwnd, msg, wparam, lparam):
     global overlay_text
 
     if msg == win32con.WM_PAINT:
-        # Instead of BeginPaint/EndPaint (which can be tricky with layered windows),
-        # just get a device context and draw over whatever was there previously.
-        hdc = win32gui.GetDC(hwnd)
+        hdc, paintStruct = win32gui.BeginPaint(hwnd)
+
+        
+        brush = win32gui.GetStockObject(win32con.BLACK_BRUSH)
+        win32gui.FillRect(hdc, win32gui.GetClientRect(hwnd), brush)
+
         win32gui.SetTextColor(hdc, win32api.RGB(255, 255, 255))
         win32gui.SetBkMode(hdc, win32con.TRANSPARENT)
 
-        # Only draw overlay_text; do not fall back to "Hello World".
         if overlay_text:
             rect = win32gui.GetClientRect(hwnd)
             x, y = rect[0], rect[1]
@@ -59,7 +63,7 @@ def wnd_proc(hwnd, msg, wparam, lparam):
                 (line_w, line_h) = win32gui.GetTextExtentPoint32(hdc, line)
                 y += line_h
 
-        win32gui.ReleaseDC(hwnd, hdc)
+        win32gui.EndPaint(hwnd, paintStruct)
         return 0
 
     elif msg == win32con.WM_DESTROY:
@@ -68,13 +72,17 @@ def wnd_proc(hwnd, msg, wparam, lparam):
 
     return win32gui.DefWindowProc(hwnd, msg, wparam, lparam)
 
-
+# Register window class
 # Register window class
 wc = win32gui.WNDCLASS()
 hinst = win32api.GetModuleHandle(None)
 wc.hInstance = hinst
 wc.lpszClassName = str(uuid.uuid4())
 wc.lpfnWndProc = wnd_proc
+
+# ← Add this line so that the client area is cleared to transparent before each paint
+#wc.hbrBackground = win32gui.GetStockObject(win32con.NULL_BRUSH)
+
 class_atom = win32gui.RegisterClass(wc)
 
 # Create window
@@ -121,6 +129,30 @@ def toggle_overlay():
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode("utf-8")
+
+def extract_image_o1():
+    image_path = "image1.png"
+
+    base64_image = encode_image(image_path)
+
+    response = client.responses.create(
+        model="o1-2024-12-17",
+        input=[
+        {
+            "role": "user",
+            "content": [
+                { "type": "input_text", "text": "extract all the details related to the coding question in the image in a nice format" },
+                {
+                    "type": "input_image",
+                    "image_url": f"data:image/jpeg;base64,{base64_image}",
+                },
+            ],
+        }
+        ],
+        )
+    print("+++++++++++++++++++++++++++++++response form 01+++++++++++++++++++++++++++")
+    print(response.output_text)
+    return response.output_text
 
 def ocr():
     image_path = "image1.png"
@@ -205,7 +237,8 @@ def receive():
         screenchot()
         latest_o1 = image_to_o1()
 
-        question = ocr()
+        #question = ocr()
+        question = extract_image_o1()
         #now we need to call ocr to extract text and give it to the o3
 
         latest_o3 = question_to_o3(question)
@@ -216,10 +249,14 @@ def receive():
         return jsonify(status="ok", action="toggle"), 200
     
     elif msg == "esc":
-        global overlay_text
-        toggle_overlay()
-        overlay_text = latest_o1 or "No o1 response available."
-        print(latest_o1)
+        global overlay_text,answers,state
+        if not visible:
+            toggle_overlay()
+        overlay_text = answers[state]
+        print(overlay_text)
+        state+=1
+        state = state % len(answers)
+        #print(latest_o1)
         # Force a WM_PAINT so the new overlay_text is drawn immediately
         win32gui.InvalidateRect(hwnd, None, True)
         win32gui.UpdateWindow(hwnd)

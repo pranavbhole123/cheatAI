@@ -1,16 +1,14 @@
-E&j windoes [Running] - Oracle VirtualBox = a x
-File. Machine View Input Devices Help
-\ © Levcegrephicaly Sme lest Eq. x # = x
-< Hello World 06-05 ak @:
-€] setG00 x
-é & ® Submit D 98 @ G Register or Signin
-& Desert fi < <P Code
+~ © Lexcegraphicaly Sma lest Eq. X= Me Inbox (9.045)-2022cso1103G + = x
+€ C83 _leetcode.com/problems/lexicographically-smallest-equivalent-string/description/?envType=daily-question8envid=2025-06-05 axe @:
+(Qleedersnciio iam prany .
+C ® Submit D 98 GB GS Register or Signin
+© Desert 2 <  $P Code
 Pychen3 y+ Auto Noo wv
-1061 1 class Solution: ~
+1061 1. class Solution: ~
 2 | def smallestEquivalentString(self, si: str, s2: str, baseStr:
 str) -> str:
 3
-You are q
+You are g
 We say
 * For ex|
 Equivaler
@@ -18,12 +16,13 @@ Equivaler
 © Sym
 © Transi
 For exai alent strings of baseStr =
-"eed", al
-Return # pnd s2
-You need to Login / Sign up to run or submit
-27k BH OM w 4 OO #5218 0nline —_@ Testcase Test Resulz
-83 © Type here to search . te or Abe Ban BOM
-a yp ” bal n cs eysf2005
-whe Bo BRA (rightcen
-eB Hot days ahead a : - ms @ ‘i om ENG gs oy & 20:17
-30°C mS Search . LL -¢ @B¢ ww VW A 2 Uw FY ® 9506-2005
+"eed", a
+Return # pod 52
+Examplq
+Input: sl = "parker", s2 = "morris", baseStr = "parser"
+Output: makkek Youneed to Login / Sign up to run or submit
+Explanation: Based on the equivalency information in s1 and s2, we can group their characters as [m,p], ¥
+27K BH O25 w GO #5982 Online  @Testcase —Test Result
+httpsi//leetcode.com/tag/stringy
+HE Type here t h . =i or Abe Ba BBM
+a fype here to searc! . Ba Gin e 6/5/2025,
