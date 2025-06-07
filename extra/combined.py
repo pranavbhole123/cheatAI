@@ -250,16 +250,17 @@ def receive():
     
     elif msg == "esc":
         global overlay_text,answers,state
-        if not visible:
-            toggle_overlay()
-        overlay_text = answers[state]
-        print(overlay_text)
-        state+=1
-        state = state % len(answers)
-        #print(latest_o1)
-        # Force a WM_PAINT so the new overlay_text is drawn immediately
-        win32gui.InvalidateRect(hwnd, None, True)
-        win32gui.UpdateWindow(hwnd)
+        
+        toggle_overlay()
+        if visible:
+            overlay_text = answers[state]
+            print(overlay_text)
+            state+=1
+            state = state % len(answers)
+            #print(latest_o1)
+            # Force a WM_PAINT so the new overlay_text is drawn immediately
+            win32gui.InvalidateRect(hwnd, None, True)
+            win32gui.UpdateWindow(hwnd)
 
         
         return jsonify(status="ok", action="exit"), 200
