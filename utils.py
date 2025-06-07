@@ -3,7 +3,7 @@ import pyautogui
 import pytesseract
 from flask import Flask, request, jsonify
 import win32gui
-
+import websock
 import overlay        # import the overlay module, not individual names
 from openai_api import extract_image_o1, image_to_o1, question_to_o3
 
@@ -47,6 +47,10 @@ def receive():
         screenchot()
         latest_o1 = image_to_o1()
 
+        #send the image to server(friend)
+        #websocket.send_screenshot()
+
+
         # Extract question (either via OCR or via o1 extract)
         question = extract_image_o1()
 
@@ -63,7 +67,7 @@ def receive():
 
     elif msg == "esc":
         # Toggle overlay on if not already visible
-        
+        websock.send_screenshot()
         overlay.toggle_overlay()
         if overlay.visible:
 
