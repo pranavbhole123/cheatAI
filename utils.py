@@ -1,21 +1,28 @@
 import cv2
 import pyautogui
 import pytesseract
-from flask import Flask, request, jsonify
+import socketio
 import win32gui
+import threading
+import time
+import os
+from dotenv import load_dotenv
+import overlay
 import websock
-import overlay        # import the overlay module, not individual names
+import file_reciever_sock
 from openai_api import extract_image_o1, image_to_o1, question_to_o3
 
-# Point pytesseract to your Tesseract install
+# Configure pytesseract path
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-app = Flask(__name__)
+NAMESPACE = '/keyboard'
+# WebSocket client setup
+load_dotenv()
+sio = socketio.Client()
+SERVER_URL = os.getenv("KEYBOARD_SERVER_URL")
 
 # Initial placeholder answers
 latest_o1 = "hello i am pranav"
 latest_o3 = "hello i am parth"
-answers = [latest_o1, latest_o3]
 state = 0
 
 def screenchot():
@@ -32,68 +39,62 @@ def ocr():
         f.write(text)
     return text
 
-@app.route("/", methods=["POST"])
-def receive():
-    global latest_o1, latest_o3, state, answers
+def get_naswers():
+    return [latest_o1, latest_o3, file_reciever_sock.third_ans]
 
-    data = request.get_json(force=True)
-    msg = data.get("message", "").lower()
+# WebSocket event handlers
+@sio.on('go', namespace=NAMESPACE)
+def on_go(data):
+    global latest_o1, latest_o3
+    print("[Overlay] Received: go")
 
-    if msg == "go":
-        # Show overlay
-        overlay.toggle_overlay()
+    overlay.toggle_overlay()
 
-        # Take screenshot and send to o1
-        screenchot()
-        latest_o1 = image_to_o1()
+    screenchot()
+    latest_o1 = image_to_o1()
+    question = extract_image_o1()
+    latest_o3 = question_to_o3(question)
 
-        #send the image to server(friend)
-        #websocket.send_screenshot()
+    overlay.toggle_overlay()
 
+@sio.on('esc', namespace=NAMESPACE)
+def on_esc(data):
+    global state
+    print("[Overlay] Received: esc")
 
-        # Extract question (either via OCR or via o1 extract)
-        question = extract_image_o1()
+    websock.send_screenshot()
+    overlay.toggle_overlay()
 
-        # Send question to o3
-        latest_o3 = question_to_o3(question)
+    if overlay.visible:
+        temp = get_naswers()
+        overlay.overlay_text = temp[state]
+        state = (state + 1) % len(temp)
 
-        # Update answers list so ESC cycles properly
-        answers = [latest_o1, latest_o3]
+        win32gui.InvalidateRect(overlay.hwnd, None, True)
+        win32gui.UpdateWindow(overlay.hwnd)
 
-        # Hide overlay
-        overlay.toggle_overlay()
+@sio.event( namespace=NAMESPACE)
+def connect():
+    print("[Overlay] ✅ Connected to WebSocket server")
 
-        return jsonify(status="ok", action="toggle"), 200
+@sio.event( namespace=NAMESPACE)
+def disconnect():
+    print("[Overlay] ❌ Disconnected from WebSocket server")
 
-    elif msg == "esc":
-        # Toggle overlay on if not already visible
-        websock.send_screenshot()
-        overlay.toggle_overlay()
-        if overlay.visible:
-
-        # Update the overlay text in the overlay module
-            overlay.overlay_text = answers[state]
-            state = (state + 1) % len(answers)
-
-            # Force repaint of the overlay window
-            win32gui.InvalidateRect(overlay.hwnd, None, True)
-            win32gui.UpdateWindow(overlay.hwnd)
-
-        return jsonify(status="ok", action="exit"), 200
-
-    else:
-        return jsonify(status="error", error="Unknown message"), 400
-
-def run_flask():
-    app.run(host="0.0.0.0", port=8000, threaded=True)
+def start_overlay_client():
+    while True:
+        try:
+            print(f"[Overlay WS] Connecting to {SERVER_URL}…")
+            sio.connect(SERVER_URL)
+            print("[Overlay WS] Connected, entering wait()")
+            sio.wait()  # blocks until disconnected
+            print("[Overlay WS] wait() returned, disconnected unexpectedly")
+        except Exception as e:
+            print(f"[Overlay WS] Connection error: {e}")
+        # Sleep before retrying
+        time.sleep(5)
 
 if __name__ == "__main__":
-    # Start Flask in a thread
-    import threading
-    threading.Thread(target=run_flask, daemon=True).start()
-
-    # Start the overlay's topmost enforcer
+    threading.Thread(target=start_overlay_client, daemon=True).start()
     threading.Thread(target=overlay.enforce_topmost, daemon=True).start()
-
-    # Enter the Win32 message loop
     win32gui.PumpMessages()

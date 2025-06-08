@@ -1,16 +1,30 @@
-import keyboard    # pip install keyboard
-import requests    # pip install requests
-import sys
+# keyboard_client.py
 
-HOST_IP = "192.168.0.119"   # ← change to your host’s IP as seen from the VM
-URL = f"http://{HOST_IP}:8000/"
+import keyboard                # pip install keyboard
+import socketio                # pip install "python-socketio[client]"
+
+HOST_IP = ""   # Example: 192.168.1.10
+WS_URL = f"http://192.168.0.108:5050"
+NAMESPACE = '/keyboard'
+
+# Create Socket.IO client
+sio = socketio.Client()
+
+@sio.event(namespace=NAMESPACE)
+def connect():
+    print("[keyboard_client] ✅ Connected to keyboard relay server")
+
+@sio.event(namespace=NAMESPACE)
+def disconnect():
+    print("[keyboard_client] ❌ Disconnected from server")
+
+@sio.on('message', namespace=NAMESPACE)
+def on_message(data):
+    print(f"[keyboard_client] 📩 Received message: {data}")
 
 def send(message):
-    try:
-        resp = requests.post(URL, json={"message": message}, timeout=15)
-        print(f"→ Sent '{message}', Response:", resp.json())
-    except Exception as e:
-        print("Error:", e)
+    sio.emit('message', message, namespace=NAMESPACE)
+    print(f"[keyboard_client] → Sent '{message}'")
 
 def on_backtick(event):
     send("go")
@@ -19,10 +33,15 @@ def on_esc(event):
     send("esc")
 
 if __name__ == "__main__":
-    #print("Press ` to send 'go' message to server.")
-    #print("Press Esc to send 'esc' message to server.")
-    
-    keyboard.on_press_key("`", on_backtick)
-    keyboard.on_press_key("esc", on_esc)
+    try:
+        print(f"[keyboard_client] 🌐 Connecting to {WS_URL}{NAMESPACE}")
+        sio.connect(WS_URL, namespaces=[NAMESPACE])
 
-    keyboard.wait()  # Blocks until interrupted (e.g. Ctrl+C)
+        keyboard.on_press_key("`", on_backtick)
+        keyboard.on_press_key("esc", on_esc)
+
+        keyboard.wait()  # Keep process alive
+    except KeyboardInterrupt:
+        print("[keyboard_client] 🛑 Exiting...")
+    finally:
+        sio.disconnect()

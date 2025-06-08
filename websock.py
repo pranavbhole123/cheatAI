@@ -3,9 +3,13 @@ import socketio
 import time
 import base64
 import time
+from dotenv import load_dotenv
+import os
 
 # Replace with your cloud server’s address:
-CLOUD_URL = 'http://localhost:5000'
+load_dotenv()
+CLOUD_URL = os.getenv("WEB_SOCKET_SERVER_URL")
+print(CLOUD_URL)
 
 # This is the global Socket.IO client you’ll reuse everywhere
 sio = socketio.Client()
