@@ -11,6 +11,7 @@ import overlay
 import websock
 import file_reciever_sock
 from openai_api import extract_image_o1, image_to_o1, question_to_o3
+from datetime import datetime
 
 # Configure pytesseract path
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -23,10 +24,15 @@ SERVER_URL = os.getenv("KEYBOARD_SERVER_URL")
 # Initial placeholder answers
 latest_o1 = "hello i am pranav"
 latest_o3 = "hello i am parth"
+latest_4 = "this is gpt 4"
 state = 0
 
+os.makedirs('query', exist_ok=True)
 def screenchot():
-    pyautogui.screenshot("image1.png")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    filename = os.path.join("query", f"screenshot_{timestamp}.png")
+    pyautogui.screenshot(filename)
+    print(f"[Overlay] 📸 Saved screenshot as {filename}")
 
 def ocr():
     image = cv2.imread("image1.png")
@@ -40,7 +46,7 @@ def ocr():
     return text
 
 def get_naswers():
-    return [latest_o1, latest_o3, file_reciever_sock.third_ans]
+    return [latest_o1, latest_o3, file_reciever_sock.third_ans,latest_4]
 
 # WebSocket event handlers
 @sio.on('go', namespace=NAMESPACE)
@@ -51,18 +57,33 @@ def on_go(data):
     overlay.toggle_overlay()
 
     screenchot()
+    '''
     latest_o1 = image_to_o1()
     question = extract_image_o1()
     latest_o3 = question_to_o3(question)
+    '''
 
     overlay.toggle_overlay()
+
+@sio.on('trigger',namespace=NAMESPACE)
+def on_trigger(data):
+    global latest_o1, latest_o3,latest_4
+    overlay.toggle_overlay()
+    websock.send_screenshot()
+    latest_o1 = image_to_o1()
+    question = extract_image_o1()
+    latest_o3 = question_to_o3(question,model_name="o3-mini-2025-01-31")
+    latest_4 = question_to_o3(question,model_name="gpt-4.1-2025-04-14")
+    overlay.toggle_overlay()
+
+
 
 @sio.on('esc', namespace=NAMESPACE)
 def on_esc(data):
     global state
     print("[Overlay] Received: esc")
 
-    websock.send_screenshot()
+    #websock.send_screenshot()
     overlay.toggle_overlay()
 
     if overlay.visible:

@@ -1,2 +1,8 @@
 .env
 __pycache__
+received_files
+serve_client/served_screenshots
+server/received_files
+server/served_screenshots
+server/received_screenshots
+/query

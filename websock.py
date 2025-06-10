@@ -27,23 +27,41 @@ def on_ack(data):
     print("📬 Ack from cloud:", data)
 
 
+
 def send_screenshot():
     """
-    Reads `image1.png`, encodes it as Base64,
-    and emits it over the existing Socket.IO connection.
+    Reads all images in the `query` folder, encodes them as Base64,
+    and emits each over the existing Socket.IO connection.
     """
-    try:
-        with open("image1.png", "rb") as imgf:
-            b64 = base64.b64encode(imgf.read()).decode("utf-8")
-    except FileNotFoundError:
-        print("[ws_client] image1.png not found")
+    image_dir = "query"
+    if not os.path.exists(image_dir):
+        print("[ws_client] 'query' folder does not exist.")
         return
 
-    sio.emit('screenshot', {
-        'image': b64,
-        'timestamp': time.time()
-    })
-    print("[ws_client] Screenshot sent to cloud")
+    image_files = sorted([
+        f for f in os.listdir(image_dir)
+        if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+    ])
+
+    if not image_files:
+        print("[ws_client] No screenshots to send.")
+        return
+
+    for filename in image_files:
+        path = os.path.join(image_dir, filename)
+        try:
+            with open(path, "rb") as imgf:
+                b64 = base64.b64encode(imgf.read()).decode("utf-8")
+        except Exception as e:
+            print(f"[ws_client] ❌ Failed to read {filename}: {e}")
+            continue
+
+        sio.emit('screenshot', {
+            'image': b64,
+            'filename': filename,
+            'timestamp': time.time()
+        })
+        print(f"[ws_client] 📤 Sent {filename} to cloud")
 
 
 

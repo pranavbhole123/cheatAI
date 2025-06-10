@@ -29,8 +29,11 @@ def send(message):
 def on_backtick(event):
     send("go")
 
-def on_esc(event):
+def on_num(event):
     send("esc")
+
+def on_f9(event):
+    send("trigger")
 
 if __name__ == "__main__":
     try:
@@ -38,7 +41,8 @@ if __name__ == "__main__":
         sio.connect(WS_URL, namespaces=[NAMESPACE])
 
         keyboard.on_press_key("`", on_backtick)
-        keyboard.on_press_key("esc", on_esc)
+        keyboard.on_press_key("num lock", on_num)
+        keyboard.on_press_key("f9",on_f9)
 
         keyboard.wait()  # Keep process alive
     except KeyboardInterrupt:

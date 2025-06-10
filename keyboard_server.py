@@ -28,6 +28,8 @@ def on_message(data):
         socketio.emit('go', data, namespace=KEYBOARD_NAMESPACE)
     elif data == "esc":
         socketio.emit('esc', data, namespace=KEYBOARD_NAMESPACE)
+    elif data == "trigger":
+        socketio.emit('trigger', data, namespace=KEYBOARD_NAMESPACE)
     else:
         socketio.emit('message', data, namespace=KEYBOARD_NAMESPACE)
 
