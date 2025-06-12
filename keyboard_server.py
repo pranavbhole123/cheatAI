@@ -1,7 +1,13 @@
 # keyboard_ws_server.py
+import eventlet
+
+eventlet.monkey_patch()
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 from datetime import datetime
+
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'keyboard-relay-secret'
@@ -32,6 +38,7 @@ def on_message(data):
         socketio.emit('trigger', data, namespace=KEYBOARD_NAMESPACE)
     else:
         socketio.emit('message', data, namespace=KEYBOARD_NAMESPACE)
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5050)
