@@ -51,7 +51,7 @@ def on_new_screenshot(data):
 # 2) Connect to the cloud server’s /serve namespace
 
 if __name__ == '__main__':
-    CLOUD_URL = 'http://localhost:5000/serve'  # <-- adjust host/port
+    CLOUD_URL = 'http://34.131.212.123:5000/serve'  # <-- adjust host/port
 
     try:
         sio.connect(CLOUD_URL, namespaces=['/serve'])

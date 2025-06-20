@@ -46,9 +46,9 @@ def extract_image_o1():
 
     return response.output_text
 
-def image_to_o1():
+def image_to_o1(text):
     input_items = [
-        {"type": "input_text", "text": "solve the coding question in these images in python"}
+        {"type": "input_text", "text": text}
     ]
 
     # Iterate over all image files in the query directory
@@ -75,7 +75,7 @@ def image_to_o1():
 def question_to_o3(question, model_name):
     # Prepare base messages
     messages = [
-        {"role": "system", "content": "Solve this coding problem and provide the answer in Python."},
+        {"role": "system", "content": "Solve this coding problem and provide the answer in Python in such a way that it is not more than 70 lines explain logic using comments and dont waste lines for it write in same line but give two tab before starting the comment. and dont shrink the normal idenation to save the space keep syntax normal.explain logic first in brief in about 2 lines"},
         {"role": "user", "content": question},
     ]
 

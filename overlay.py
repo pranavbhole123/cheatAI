@@ -51,11 +51,11 @@ EX_STYLE = (
 
 hwnd = win32gui.CreateWindowEx(
     EX_STYLE, class_atom, None, win32con.WS_POPUP,
-    100, 100, 800, 800,
+    10, 10, 1000, 1000,
     None, None, hinst, None
 )
 
-win32gui.SetLayeredWindowAttributes(hwnd, 0, 128, win32con.LWA_ALPHA)
+win32gui.SetLayeredWindowAttributes(hwnd, 0, 200, win32con.LWA_ALPHA)
 win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 
 

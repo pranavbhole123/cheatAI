@@ -1,6 +1,4 @@
-import eventlet
 
-eventlet.monkey_patch()
 
 from flask import Flask, request
 from flask_socketio import SocketIO, emit

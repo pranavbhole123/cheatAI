@@ -1,7 +1,5 @@
 # keyboard_ws_server.py
-import eventlet
 
-eventlet.monkey_patch()
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
 from datetime import datetime

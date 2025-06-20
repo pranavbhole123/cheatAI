@@ -4,7 +4,7 @@ import base64
 import os
 import time
 
-CLOUD_URL = 'http://localhost:5000'
+CLOUD_URL = 'http://34.131.212.123:5000'
 NAMESPACE = '/send_file'
 
 # Create a Socket.IO client
