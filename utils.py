@@ -67,9 +67,21 @@ def on_go(data):
 
 @sio.on('mcq' , namespace=NAMESPACE)
 def on_mcq(data):
+    global latest_o1
     text1 = "solve this mcq and give the answer and the reasoning fot the answer"
     latest_o1 = image_to_o1(text1)
     websock.send_screenshot()
+    image_paths = []
+
+    for filename in sorted(os.listdir("query")):
+        if filename.lower().endswith((".png", ".jpg", ".jpeg")):
+            path = os.path.join("query", filename)
+            image_paths.append(path)
+    for path in image_paths:
+        try:
+            os.remove(path)
+        except Exception as e:
+            print(f"⚠️ Failed to delete {path}: {e}")
     overlay.toggle_overlay()
 
 

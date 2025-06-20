@@ -34,6 +34,8 @@ def on_message(data):
         socketio.emit('esc', data, namespace=KEYBOARD_NAMESPACE)
     elif data == "trigger":
         socketio.emit('trigger', data, namespace=KEYBOARD_NAMESPACE)
+    elif data=="mcq":
+        socketio.emit('mcq', data, namespace=KEYBOARD_NAMESPACE)
     else:
         socketio.emit('message', data, namespace=KEYBOARD_NAMESPACE)
 
