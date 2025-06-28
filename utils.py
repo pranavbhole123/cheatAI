@@ -54,15 +54,9 @@ def on_go(data):
     global latest_o1, latest_o3
     print("[Overlay] Received: go")
 
-    overlay.toggle_overlay()
 
     screenchot()
-    '''
-    latest_o1 = image_to_o1()
-    question = extract_image_o1()
-    latest_o3 = question_to_o3(question)
-    '''
-
+   
     overlay.toggle_overlay()
 
 @sio.on('mcq' , namespace=NAMESPACE)
@@ -91,10 +85,10 @@ def on_trigger(data):
     overlay.toggle_overlay()
     websock.send_screenshot()
     text1 = "solve the coding question in these images in python in such a way that it is not more than 70 lines.explain logic using comments and dont waste lines for it write in same line but give two tabspaces before it. and dont shrink the normal idenation to save the space keep syntax normal.explain logic first in brief in about 2 lines"
-    latest_o1 = image_to_o1(text1)
-    question = extract_image_o1()
-    latest_o3 = question_to_o3(question,model_name="o3-mini-2025-01-31")
-    latest_4 = question_to_o3(question,model_name="gpt-4.1-2025-04-14")
+    #latest_o1 = image_to_o1(text1)
+    #question = extract_image_o1()
+    #latest_o3 = question_to_o3(question,model_name="o3-mini-2025-01-31")
+    #latest_4 = question_to_o3(question,model_name="gpt-4.1-2025-04-14")
     overlay.toggle_overlay()
 
 

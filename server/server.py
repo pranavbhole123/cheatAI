@@ -27,11 +27,12 @@ def handle_connect():
 def handle_screenshot(data):
     b64 = data.get('image')
     ts  = data.get('timestamp', datetime.now().timestamp())
+    #incoming = data.get('filename')
     if not b64:
         emit('error', {'message': 'No image data received'})
         return
 
-    filename = datetime.fromtimestamp(ts).strftime("%Y%m%d_%H%M%S.png")
+    filename = data.get('filename')
     path = os.path.join('received_screenshots', filename)
     with open(path, 'wb') as f:
         f.write(base64.b64decode(b64))
