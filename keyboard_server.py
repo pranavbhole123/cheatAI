@@ -36,6 +36,10 @@ def on_message(data):
         socketio.emit('trigger', data, namespace=KEYBOARD_NAMESPACE)
     elif data=="mcq":
         socketio.emit('mcq', data, namespace=KEYBOARD_NAMESPACE)
+    elif data=="up":
+        socketio.emit('up', data, namespace=KEYBOARD_NAMESPACE)
+    elif data=="down":
+        socketio.emit('down', data, namespace=KEYBOARD_NAMESPACE)
     else:
         socketio.emit('message', data, namespace=KEYBOARD_NAMESPACE)
 

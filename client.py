@@ -35,6 +35,12 @@ def on_num(event):
 def on_f9(event):
     send("trigger")
 
+def on_up(event):
+    send("up")
+
+def on_down(event):
+    send("down")
+
 if __name__ == "__main__":
     try:
         print(f"[keyboard_client] 🌐 Connecting to {WS_URL}{NAMESPACE}")
@@ -43,6 +49,8 @@ if __name__ == "__main__":
         keyboard.on_press_key("`", on_backtick)
         keyboard.on_press_key("num lock", on_num)
         keyboard.on_press_key("f9",on_f9)
+        keyboard.on_press_key("up",on_up)
+        keyboard.on_press_key("down",on_down)
 
         keyboard.wait()  # Keep process alive
     except KeyboardInterrupt:

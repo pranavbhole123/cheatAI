@@ -62,6 +62,7 @@ def send_screenshot():
             'timestamp': time.time()
         })
         print(f"[ws_client] 📤 Sent {filename} to cloud")
+        time.sleep(1)
 
 
 

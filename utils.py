@@ -9,10 +9,9 @@ import os
 from dotenv import load_dotenv
 import overlay
 import websock
-import file_reciever_sock
 from openai_api import extract_image_o1, image_to_o1, question_to_o3
 from datetime import datetime
-
+from gemini_api import gemini
 # Configure pytesseract path
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 NAMESPACE = '/keyboard'
@@ -22,9 +21,9 @@ sio = socketio.Client()
 SERVER_URL = os.getenv("KEYBOARD_SERVER_URL")
 
 # Initial placeholder answers
-latest_o1 = "hello i am pranav"
-latest_o3 = "hello i am parth"
+latest_o3 = "this is o3"
 latest_4 = "this is gpt 4"
+ans_gem = "this is gem"
 state = 0
 
 os.makedirs('query', exist_ok=True)
@@ -46,7 +45,7 @@ def ocr():
     return text
 
 def get_naswers():
-    return [latest_o1, latest_o3, file_reciever_sock.third_ans,latest_4]
+    return [latest_o3,ans_gem,latest_4]
 
 # WebSocket event handlers
 @sio.on('go', namespace=NAMESPACE)
@@ -62,7 +61,7 @@ def on_go(data):
 @sio.on('mcq' , namespace=NAMESPACE)
 def on_mcq(data):
     global latest_o1
-    text1 = "solve this mcq and give the answer and the reasoning fot the answer"
+    text1 = "solve this mcq and give the answer as otion and reason in one line"
     latest_o1 = image_to_o1(text1)
     websock.send_screenshot()
     image_paths = []
@@ -81,14 +80,13 @@ def on_mcq(data):
 
 @sio.on('trigger',namespace=NAMESPACE)
 def on_trigger(data):
-    global latest_o1, latest_o3,latest_4
+    global latest_o3,latest_4,ans_gem
     overlay.toggle_overlay()
-    websock.send_screenshot()
-    text1 = "solve the coding question in these images in python in such a way that it is not more than 70 lines.explain logic using comments and dont waste lines for it write in same line but give two tabspaces before it. and dont shrink the normal idenation to save the space keep syntax normal.explain logic first in brief in about 2 lines"
-    #latest_o1 = image_to_o1(text1)
-    #question = extract_image_o1()
-    #latest_o3 = question_to_o3(question,model_name="o3-mini-2025-01-31")
-    #latest_4 = question_to_o3(question,model_name="gpt-4.1-2025-04-14")
+    
+    question = extract_image_o1()
+    latest_o3 = question_to_o3(question,model_name="o3-mini-2025-01-31")
+    latest_4 = question_to_o3(question,model_name="gpt-4.1-2025-04-14")
+    ans_gem = gemini(question)
     overlay.toggle_overlay()
 
 
@@ -106,6 +104,21 @@ def on_esc(data):
         overlay.overlay_text = temp[state]
         state = (state + 1) % len(temp)
 
+        win32gui.InvalidateRect(overlay.hwnd, None, True)
+        win32gui.UpdateWindow(overlay.hwnd)
+
+@sio.on('up',namespace=NAMESPACE)
+def on_up(data):
+    if overlay.visible:
+        overlay.scroll_offset+=1
+        win32gui.InvalidateRect(overlay.hwnd, None, True)
+        win32gui.UpdateWindow(overlay.hwnd)
+
+@sio.on('down',namespace=NAMESPACE)
+def on_down(data):
+    if overlay.visible:
+        if overlay.scroll_offset>0:
+            overlay.scroll_offset-=1
         win32gui.InvalidateRect(overlay.hwnd, None, True)
         win32gui.UpdateWindow(overlay.hwnd)
 

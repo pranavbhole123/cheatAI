@@ -7,12 +7,14 @@ import win32api
 
 overlay_text = ""
 visible = False
+scroll_offset = 0
 
 VK_ESCAPE = win32con.VK_ESCAPE
 
 def wnd_proc(hwnd, msg, wparam, lparam):
     global overlay_text
     if msg == win32con.WM_PAINT:
+        # we would have to make changes here 
         hdc, paintStruct = win32gui.BeginPaint(hwnd)
         brush = win32gui.GetStockObject(win32con.BLACK_BRUSH)
         win32gui.FillRect(hdc, win32gui.GetClientRect(hwnd), brush)
@@ -22,7 +24,10 @@ def wnd_proc(hwnd, msg, wparam, lparam):
         if overlay_text:
             rect = win32gui.GetClientRect(hwnd)
             x, y = rect[0], rect[1]
-            for line in overlay_text.splitlines():
+            #here we are already splittinf the line
+            lines = overlay_text.splitlines()
+            visible_lines = lines[scroll_offset:]
+            for line in visible_lines:
                 win32gui.DrawText(hdc, line, -1, (x, y, rect[2], rect[3]), win32con.DT_LEFT | win32con.DT_TOP)
                 (line_w, line_h) = win32gui.GetTextExtentPoint32(hdc, line)
                 y += line_h

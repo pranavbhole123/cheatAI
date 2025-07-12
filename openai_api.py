@@ -75,7 +75,7 @@ def image_to_o1(text):
 def question_to_o3(question, model_name):
     # Prepare base messages
     messages = [
-        {"role": "system", "content": "Solve this coding problem and provide the answer in Python in such a way that it is not more than 70 lines explain logic using comments and dont waste lines for it write in same line but give two tab before starting the comment. and dont shrink the normal idenation to save the space keep syntax normal.explain logic first in brief in about 2 lines"},
+        {"role": "system", "content": "Solve this coding problem and provide the answer in Python covering all test cases keeping in mind the constraints also provide explanation of you approach in short about 10 lines before the code using comments."},
         {"role": "user", "content": question},
     ]
 
