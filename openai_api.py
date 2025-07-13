@@ -12,7 +12,7 @@ def encode_image(image_path):
 
 def extract_image_o1():
     input_items = [
-        {"type": "input_text", "text": "extract all the details related to the coding question in the images in a nice format"}
+        {"type": "input_text", "text": "extract all the details related to the coding question in the images in a nice format also the language which is selcted in the editor in side"}
     ]
 
     image_paths = []
@@ -75,7 +75,7 @@ def image_to_o1(text):
 def question_to_o3(question, model_name):
     # Prepare base messages
     messages = [
-        {"role": "system", "content": "Solve this coding problem and provide the answer in Python covering all test cases keeping in mind the constraints also provide explanation of you approach in short about 10 lines before the code using comments."},
+        {"role": "system", "content": "Solve this coding problem and provide the answer in language descrived in question description. if nothing described then in python, covering all test cases keeping in mind the constraints also provide explanation of you approach in short about 10 lines before the code using comments."},
         {"role": "user", "content": question},
     ]
 

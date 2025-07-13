@@ -84,9 +84,9 @@ def on_trigger(data):
     overlay.toggle_overlay()
     
     question = extract_image_o1()
-    latest_o3 = question_to_o3(question,model_name="o3-mini-2025-01-31")
-    latest_4 = question_to_o3(question,model_name="gpt-4.1-2025-04-14")
-    ans_gem = gemini(question)
+    latest_o3 = "o3\n"+question_to_o3(question,model_name="o3-mini-2025-01-31")
+    latest_4 = "4\n"+question_to_o3(question,model_name="gpt-4.1-2025-04-14")
+    ans_gem = "gem\n"+gemini(question)
     overlay.toggle_overlay()
 
 

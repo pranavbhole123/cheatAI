@@ -11,26 +11,81 @@ scroll_offset = 0
 
 VK_ESCAPE = win32con.VK_ESCAPE
 
+def get_monospace_font(point_size=12):
+    # 1) Get screen DPI (pixels per inch in Y)
+    hdc = win32gui.GetDC(0)
+    dpi = ctypes.windll.gdi32.GetDeviceCaps(hdc, win32con.LOGPIXELSY)
+    win32gui.ReleaseDC(0, hdc)
+
+    # 2) Convert point size to logical height (negative for character height)
+    lfHeight = -int(point_size * dpi / 72)
+
+    # 3) Fill a LOGFONT structure
+    lf = win32gui.LOGFONT()
+    lf.lfHeight         = lfHeight
+    lf.lfWidth          = 0
+    lf.lfEscapement     = 0
+    lf.lfOrientation    = 0
+    lf.lfWeight         = win32con.FW_NORMAL
+    lf.lfItalic         = 0
+    lf.lfUnderline      = 0
+    lf.lfStrikeOut      = 0
+    lf.lfCharSet        = win32con.ANSI_CHARSET
+    lf.lfOutPrecision   = win32con.OUT_DEFAULT_PRECIS
+    lf.lfClipPrecision  = win32con.CLIP_DEFAULT_PRECIS
+    lf.lfQuality        = win32con.DEFAULT_QUALITY
+    lf.lfPitchAndFamily = win32con.FIXED_PITCH | win32con.FF_MODERN
+    lf.lfFaceName       = "Consolas"
+
+    # 4) Create and return the HFONT
+    return win32gui.CreateFontIndirect(lf)
+
+
 def wnd_proc(hwnd, msg, wparam, lparam):
-    global overlay_text
+    global overlay_text, scroll_offset
+
     if msg == win32con.WM_PAINT:
-        # we would have to make changes here 
         hdc, paintStruct = win32gui.BeginPaint(hwnd)
+
+        # 1) Fill background
         brush = win32gui.GetStockObject(win32con.BLACK_BRUSH)
         win32gui.FillRect(hdc, win32gui.GetClientRect(hwnd), brush)
+
+        # 2) Setup text colors and transparent background
         win32gui.SetTextColor(hdc, win32api.RGB(255, 255, 255))
         win32gui.SetBkMode(hdc, win32con.TRANSPARENT)
 
+        # 3) Select a monospaced font
+        font = get_monospace_font(12)   # tweak size if needed
+        old_font = win32gui.SelectObject(hdc, font)
+
         if overlay_text:
             rect = win32gui.GetClientRect(hwnd)
-            x, y = rect[0], rect[1]
-            #here we are already splittinf the line
+            left, top, right, bottom = rect
+
+            # 4) Split & window the lines
             lines = overlay_text.splitlines()
-            visible_lines = lines[scroll_offset:]
+            visible_lines = lines[scroll_offset : ]
+
+            # 5) Draw each line with padding & spacing
+            padding_x, padding_y = 2, 10
+            line_spacing = 4
+            y = top + padding_y
+
             for line in visible_lines:
-                win32gui.DrawText(hdc, line, -1, (x, y, rect[2], rect[3]), win32con.DT_LEFT | win32con.DT_TOP)
-                (line_w, line_h) = win32gui.GetTextExtentPoint32(hdc, line)
-                y += line_h
+                win32gui.DrawText(
+                    hdc,
+                    line,
+                    -1,
+                    (left + padding_x, y, right, bottom),
+                    win32con.DT_LEFT | win32con.DT_TOP | win32con.DT_SINGLELINE
+                )
+                _, line_h = win32gui.GetTextExtentPoint32(hdc, line)
+                y += line_h + line_spacing
+
+        # 6) Clean up
+        win32gui.SelectObject(hdc, old_font)
+        win32gui.DeleteObject(font)
         win32gui.EndPaint(hwnd, paintStruct)
         return 0
 
@@ -56,7 +111,7 @@ EX_STYLE = (
 
 hwnd = win32gui.CreateWindowEx(
     EX_STYLE, class_atom, None, win32con.WS_POPUP,
-    10, 10, 1000, 1000,
+    10, 10, 1300, 1000,
     None, None, hinst, None
 )
 
